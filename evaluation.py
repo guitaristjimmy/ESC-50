@@ -49,3 +49,12 @@ if __name__ == '__main__':
         print(acc[-1])
 
     print(acc)
+
+    # plot ------------------------------------------------------------------------------------------------------------
+    x = np.arange(0,len(acc))
+    plt.bar(x=x, height=acc[:][0], width=0.25, tick_label=[1, 2, 3, 4, 5])
+    plt.bar(x=x+0.25, height=acc[:][1], width=0.25)
+    plt.ylabel('acc')
+    plt.xlabel('fold')
+    plt.legend(['MV', 'PV'])
+    plt.show()
