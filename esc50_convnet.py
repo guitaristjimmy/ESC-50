@@ -68,13 +68,13 @@ if __name__ == '__main__':
     my_callback = MyCallBack()
 
     """
-    short segments train
+    ESC short segments train
     """
-    # data = esc50.data_load('./esc50_features_ss.pkl')
+    # data = esc50.data_load('./esc10_features_ss.pkl')
     # bs = 256
     #
     # for i in range(1, 6):
-    #     model = esc50.model(lr=0.002, n_class=50, in_shape=(60, 41, 2))
+    #     model = esc50.model(lr=0.002, n_class=10, in_shape=(60, 41, 2))
     #     print(model.summary())
     #
     #     train_df = data[data['fold'] != str(i)].drop('fold', axis=1)
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     #
     #     model.fit(x=x_train, y=y_train, validation_data=(x_valid, y_valid), batch_size=bs, epochs=300,
     #               verbose=1, shuffle=True, callbacks=[my_callback])
-    #     model.save('./esc50_short_'+str(i)+'_fold.h5')
+    #     model.save('./models/esc10_ss/esc10_short_'+str(i)+'_fold.h5')
     #
     # # Plot -----------------------------------------------------------------------------------------------------------
     # fig = plt.figure()
@@ -117,49 +117,102 @@ if __name__ == '__main__':
     # plt.show()
 
     """
-    long segments train
+    ESC long segments train
     """
+    #
+    # data = esc50.data_load('./esc10_features_ls.pkl')
+    # bs = 128
+    #
+    # for i in range(1, 3):
+    #     model = esc50.model(lr=0.001, n_class=10, in_shape=(60, 101, 2))
+    #     print(model.summary())
+    #
+    #     train_df = data[data['fold'] != str(i)].drop('fold', axis=1)
+    #     val_df = data[data['fold'] == str(i)].drop('fold', axis=1)
+    #
+    #     y = train_df.pop('c')
+    #     x_train, y_train = [], []
+    #     for xid in tqdm(train_df.index):
+    #         x = train_df.loc[xid].dropna()
+    #         for seg in x:
+    #             x_train.append(seg)
+    #             y_train.append(y.loc[xid])
+    #     x_train = np.array(x_train)
+    #     y_train = np.array(y_train)
+    #     y_train = keras.utils.to_categorical(y_train)
+    #     print(x_train.shape)
+    #
+    #     y = val_df.pop('c')
+    #     x_valid, y_valid = [], []
+    #     for xid in tqdm(val_df.index):
+    #         x = val_df.loc[xid].dropna()
+    #         for seg in x:
+    #             x_valid.append(seg)
+    #             y_valid.append(y.loc[xid])
+    #     x_valid = np.array(x_valid)
+    #     y_valid = np.array(y_valid)
+    #     y_valid = keras.utils.to_categorical(y_valid)
+    #
+    #     model.fit(x=x_train, y=y_train, validation_data=(x_valid, y_valid), batch_size=bs, epochs=150,
+    #               verbose=1, shuffle=True, callbacks=[my_callback])
+    #     model.save('./models/esc10_ls/esc10_long_'+str(i)+'_fold.h5')
+    #
+    # # Plot -------------------------------------------------------------------------------------------------------------
+    # fig = plt.figure()
+    # for i in range(0, 2):
+    #     plt.subplot(1, 5, i+1)
+    #     plt.plot(my_callback.val_accuracy_logs[i], linestyle=':')
+    #     plt.plot(my_callback.train_accuracy_logs[i])
+    #     plt.legend(['val_acc', 'train_acc'])
+    #     plt.xlabel('epoch')
+    # plt.show()
 
-    data = esc50.data_load('./esc50_features_ls.pkl')
-    bs = 64
+    """
+    urban sound 8k
+    """
+    data = pd.DataFrame()
+    for i in tqdm(range(1, 11)):
+        data = data.append(pd.read_pickle('./dataset/urban8k_ss/urban8k_features_'+str(i)+'_ss.pkl'))
+    data['c'] = pd.Categorical(data['c'])
+    data['c'] = data.c.cat.codes
+    bs = 256
+    print(data.head(5))
 
-    for i in range(3, 6):
-        model = esc50.model(lr=0.001, n_class=50, in_shape=(60, 101, 2))
+    for i in range(1, 11):
+        model = esc50.model(lr=0.002, n_class=10, in_shape=(60, 41, 2))
         print(model.summary())
-
         train_df = data[data['fold'] != str(i)].drop('fold', axis=1)
         val_df = data[data['fold'] == str(i)].drop('fold', axis=1)
 
         y = train_df.pop('c')
         x_train, y_train = [], []
-        for xid in tqdm(train_df.index):
-            x = train_df.loc[xid].dropna()
+        for xid in tqdm(range(0, len(train_df.index))):
+            x = train_df.iloc[xid].dropna()
             for seg in x:
                 x_train.append(seg)
-                y_train.append(y.loc[xid])
+                y_train.append(y.iloc[xid])
         x_train = np.array(x_train)
         y_train = np.array(y_train)
         y_train = keras.utils.to_categorical(y_train)
         print(x_train.shape)
-
         y = val_df.pop('c')
         x_valid, y_valid = [], []
-        for xid in tqdm(val_df.index):
-            x = val_df.loc[xid].dropna()
+        for xid in tqdm(range(0, len(val_df.index))):
+            x = val_df.iloc[xid].dropna()
             for seg in x:
                 x_valid.append(seg)
-                y_valid.append(y.loc[xid])
+                y_valid.append(y.iloc[xid])
         x_valid = np.array(x_valid)
         y_valid = np.array(y_valid)
         y_valid = keras.utils.to_categorical(y_valid)
 
         model.fit(x=x_train, y=y_train, validation_data=(x_valid, y_valid), batch_size=bs, epochs=150,
                   verbose=1, shuffle=True, callbacks=[my_callback])
-        model.save('./models/esc50_ls/esc50_long_'+str(i)+'_fold.h5')
+        model.save('./models/urban8k_ss/urban8k_short_'+str(i)+'_fold.h5')
 
-    # Plot -------------------------------------------------------------------------------------------------------------
+    # Plot -----------------------------------------------------------------------------------------------------------
     fig = plt.figure()
-    for i in range(2, 5):
+    for i in range(0, 10):
         plt.subplot(1, 5, i+1)
         plt.plot(my_callback.val_accuracy_logs[i], linestyle=':')
         plt.plot(my_callback.train_accuracy_logs[i])
