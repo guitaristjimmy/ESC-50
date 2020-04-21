@@ -156,30 +156,29 @@ if __name__ == '__main__':
             for file in os.listdir(root+fold):
                 if file.endswith('.wav'):
                     file_paths[-1].append(root+fold+'/'+file)
-    urban8k_ext_multi(file_paths[5], 6)
-    # i = 0
-    # while i < len(file_paths):
-    #     process = []
-    #     num_cpu = multiprocessing.cpu_count()
-    #     for j in range(0, int(num_cpu/2)):
-    #         process.append(multiprocessing.Process(target=urban8k_ext_multi, args=(file_paths[i], i+1)))
-    #         print('\nprocess'+str(j+1)+'start')
-    #         process[-1].start()
-    #         i += 1
-    #         if i >= len(file_paths):
-    #             break
-    #     for j, p in enumerate(process):
-    #         p.join()
-    #         print('\nprocess'+str(j+1)+'join')
-    #         p.close()
-    # for i in range(0, len(file_paths)):
-    #     for fp in tqdm(file_paths[i]):
-    #         ext.extract_urban8k_feature(path=fp, size=41, fold=str(i+1))  # size = 41 :: short segment / size = 101 :: long segment
-    #     df = pd.DataFrame(data=ext.urban8k_features)
-    #     df['c'] = ext.urban8k_class
-    #     df['fold'] = ext.urban8k_fold
-    #     print(df.head(5))
-    #     df.to_pickle('./dataset/urban8k_ss/urban8k_features_'+str(i)+'_ss.pkl')
-    #     ext.urban8k_class = []
-    #     ext.urban8k_features = []
-    #     ext.urban8k_fold = []
+    i = 0
+    while i < len(file_paths):
+        process = []
+        num_cpu = multiprocessing.cpu_count()
+        for j in range(0, int(num_cpu/2)):
+            process.append(multiprocessing.Process(target=urban8k_ext_multi, args=(file_paths[i], i+1)))
+            print('\nprocess'+str(j+1)+'start')
+            process[-1].start()
+            i += 1
+            if i >= len(file_paths):
+                break
+        for j, p in enumerate(process):
+            p.join()
+            print('\nprocess'+str(j+1)+'join')
+            p.close()
+    for i in range(0, len(file_paths)):
+        for fp in tqdm(file_paths[i]):
+            ext.extract_urban8k_feature(path=fp, size=41, fold=str(i+1))  # size = 41 :: short segment / size = 101 :: long segment
+        df = pd.DataFrame(data=ext.urban8k_features)
+        df['c'] = ext.urban8k_class
+        df['fold'] = ext.urban8k_fold
+        print(df.head(5))
+        df.to_pickle('./dataset/urban8k_ss/urban8k_features_'+str(i)+'_ss.pkl')
+        ext.urban8k_class = []
+        ext.urban8k_features = []
+        ext.urban8k_fold = []
